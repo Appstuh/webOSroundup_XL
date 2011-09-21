@@ -1,0 +1,93 @@
+/*$
+ * Author: Arthur Thornton
+ * License: MIT Open Source
+ * Source copyright Arthur Thornton
+ */
+
+body {
+	background: url(../images/bg.jpg) no-repeat center center fixed;
+}
+
+.articleContent {
+	padding: 10px;
+	overflow: auto;
+	font-size: 0.9em;
+}
+.articleContent img {
+	max-width: 95%;
+	height: auto;
+	margin: 4px;
+	
+}
+
+.first.enyo-item {
+	border-top: none; 
+}
+.last.enyo-item {
+	border-bottom: none;
+}
+
+.enyo-toolbar {
+	height: 55px;
+}
+
+.nested-comment {
+	background-color: rgba(153, 153, 153, 0.75);
+	margin-left: 10px;
+	border-bottom: none;
+	border-left: 1px solid #ccc;
+}
+.level1.child .commentListItem {
+	margin-left: 10px;
+}
+.level2.child .commentListItem {
+	margin-left: 20px;
+}
+.level3.child .commentListItem {
+	margin-left: 30px;
+}
+.level4.child .commentListItem {
+	margin-left: 40px;
+}
+.level5.child .commentListItem {
+	margin-left: 50px;
+}
+
+.comment {
+	border: none;
+}
+
+.articleComment {
+	border: none;
+	margin-bottom: 16px;
+}
+.commentLevel0 {
+	margin-left: 0px;
+}
+.commentLevel1 {
+	margin-left: 13px;
+}
+.commentLevel2 {
+	margin-left: 26px;
+}
+.commentLevel3 {
+	margin-left: 39px;
+}
+.commentLevel4 {
+	margin-left: 52px;
+}
+.commentLevel5 {
+	margin-left: 65px;
+}
+
+.commentAuthorAndAvatar {
+	background: rgba(204, 204, 204, 0.5);
+	border-top-left-radius: 5px;
+	border-bottom-left-radius: 5px;
+	margin-bottom: 0;
+	padding-bottom: 0;
+	height: 44px;
+}
+.commentsListItemAvatar {
+	padding: 6px;
+}

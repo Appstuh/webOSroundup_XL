@@ -1,0 +1,123 @@
+/*$
+ * Author: Arthur Thornton
+ * License: MIT Open Source
+ * Source copyright Arthur Thornton
+ */
+
+.viewable {
+	background: rgba(51, 51, 51, 0.5);
+	border-radius: 12px;
+	box-shadow: none;
+	border: 0;
+	font-size: 0.8em;
+}/*
+.viewable:hover,
+.active.viewable  {
+	background: rgba(51, 51, 51, 0.75);
+}*/
+
+.landscape .viewable {
+	margin-left: 36.98px;
+	margin-right: 36.98px;
+}
+.portrait .viewable {
+	margin-left: 11px;
+	margin-right: 11px;
+}
+
+.GridItemCaption {
+	color: #cccccc;
+}
+
+.GridFolder {
+	background: rgba(51, 51, 51, 0.75);
+	height: 0px;
+}
+.landscape .GridFolder {
+	width: 928px;
+}
+.portrait .GridFolder {
+	width: 728px;
+}
+/*.landscape */.open.GridFolder {
+	height: 256px;
+}/*
+.portrait .open.GridFolder {
+	height: 512px;
+}*/
+.closed.GridFolder {
+	height: 0px;
+	border: none;
+}
+
+.ArticlePreview {
+	margin-left: 6px;
+	margin-right: 6px;
+}
+.first .ArticlePreview {
+	border-left: none;
+}
+.last .ArticlePreview {
+	border-right: none;
+}/*
+.portrait .ArticlePreview {
+	height: 406px;
+	width: 150px;
+}
+.landscape */.ArticlePreview {
+	height: 192px;
+	width: 448px;
+}
+/*.portrait .ArticlePreviewContainer {
+	height: 406px;
+}
+.landscape */.ArticlePreviewContainer {
+	height: 192px;
+}/*
+.portrait .ArticlePreviewView {
+	height: 406px;
+}
+.landscape */.ArticlePreviewView{
+	height: 150px;
+}
+
+.ArticlePreviewCaption {
+	color: #ddd;
+	font-size: 0.9em;
+	font-weight: bold;
+}
+.ArticlePreviewModified {
+	color: #ddd;
+	font-size: 0.75em;
+}
+
+.mediumText {
+	font-size: .82em;
+}
+.smallText {
+	font-size: 0.72em;
+}
+.microText {
+	font-size: 0.62em;
+}
+
+.articleContent .alignleft {
+	float: left;
+}
+.articleContent .alignright {
+	float: right;
+}
+.articleContent .aligncenter {
+	float: center;
+}
+
+.newsCarousel {
+	padding-left: 6px;
+	padding-right: 6px;
+}
+.open.newsCarousel {
+	height: 150px !important;
+}
+.closed.newsCarousel {
+	height: 0px !important;
+}
