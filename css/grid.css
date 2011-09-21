@@ -121,3 +121,6 @@
 .closed.newsCarousel {
 	height: 0px !important;
 }
+.WOR_Grid {
+	max-width: 1024px;
+}
