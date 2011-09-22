@@ -16,14 +16,24 @@ enyo.kind({
 	ready: function() {
 		this.inherited(arguments);
 		this.resetOrientationClass();
+		this.loadArticles();
+		this.$.pane.selectView(this.$.mainView);
+	},
+	loadArticles: function() {
 		for (var i = 0; i < this.categories.length; i++) {
 			this.$.getContent.call({
 				category: parseInt(this.categories[i], 10),
-				posts: 20,
+				posts: (parseInt(this.categories[i], 10) == 31) ? 15 : 20,
 				brief: 1
 			});
 		}
-		this.$.pane.selectView(this.$.mainView);
+	},
+	doRefresh: function() {
+		this.$.scrim.show();
+		for (var n in this.content) {
+			this.content[n] = [];
+		}
+		this.loadArticles();
 	},
 	openAboutPopup: function() {
 		this.$.aboutPopup.openAtCenter();
@@ -35,7 +45,11 @@ enyo.kind({
 			url: "http://www.webosroundup.com/ajax.php",
 			onSuccess: "gotContent",
 			onFailure: "gotContentFailure",
-			name: "getContent"
+			name: "getContent",
+			on0: "gotContentFailure",
+			on404: "gotContentFailure",
+			on500: "gotContentFailure",
+			timeout: 15000
 		},
 		/* WebService to shorten URLS with bit.ly */
 		{
@@ -438,6 +452,7 @@ enyo.kind({
 										{
 											kind: enyo.Grid,
 											name: "WOR_Grid",
+											className: "WOR_Grid",
 											cellClass: "viewable",
 											components: [
 												{
@@ -519,6 +534,17 @@ enyo.kind({
 									]
 								},
 								{ kind: enyo.Spacer }
+							]
+						},
+						{
+							kind: enyo.Toolbar,
+							style: "background: none; -webkit-border-image: none",
+							components: [
+								{ kind: enyo.Spacer, flex: 2 },
+								{
+									icon: "images/menu-icon-refresh.png",
+									onclick: "doRefresh"
+								}
 							]
 						}
 					]
@@ -802,12 +828,13 @@ enyo.kind({
 			onSelect: "shareArticle",
 			items: [
 				{
-					caption: "Facebook",
-					value: "Facebook"
+					caption: "Facebook"
 				},
 				{
-					caption: "Spaz HD",
-					value: "Twitter"
+					caption: "Spaz HD"
+				},
+				{
+					caption: "Glimpse"
 				}
 			]
 		}
@@ -815,6 +842,10 @@ enyo.kind({
 	/* open the articles "folder" or open the folder to the proper view */
 	openNews: function(inSender, inEvent) {
 		var openedItem = inEvent.dispatchTarget.owner.name.replace("gridItem_", "");
+		if (this.content[openedItem].length == 0) {
+			// show a popup error
+			return;
+		}
 		if (this.GridFolderOpen && this.currentlyOpened == openedItem) {
 			this.$.GridFolder.close();
 			this.currentlyOpened = "";
@@ -969,6 +1000,11 @@ enyo.kind({
 	gotContent: function(inSender, inResponse, inRequest) {
 		var category = this.categoriesByName[this.categories.indexOf(inRequest.params.category)];
 		this.content[category] = [];
+		if (inResponse.length == 0 || inRequest.xhr.status > 204 || inRequest.xhr.status < 200) {
+			this.gotContentFailure(inSender, inResponse, inRequest);
+			return;
+		}
+		
 		for (var i = 0; i < inResponse.length; i++) {
 			var when = (inResponse[i].modified !== inResponse[i].posted) ? inResponse[i].modified : inResponse[i].posted;
 			when = new Date(when);
@@ -997,7 +1033,7 @@ enyo.kind({
 				author: inResponse[i].author,
 				permalink: inResponse[i].permalink,
 				postid: inResponse[i].id,
-				postedAt: (when.getMonth()+1) + "/" + when.getDate() + "/" + when.getFullYear() + " " + hours + ":" + mins + ampm + " ET"
+				postedAt: [(when.getMonth()+1), "/", when.getDate(), "/", when.getFullYear(), " ", hours, ":", mins, ampm, " ET"].join('')
 			});
 			delete mins;
 			delete inResponse[i];
@@ -1007,7 +1043,7 @@ enyo.kind({
 			if (this.content[n].length == 0 && this.getContentError[n] != "failed")
 				return;
 		}
-		this.$.scrim.destroy();
+		this.$.scrim.hide()//destroy();
 	},
 	/* onFailure handler for the article article retrieval WebService */
 	gotContentFailure: function(inSender, inResponse, inRequest) {
@@ -1019,12 +1055,12 @@ enyo.kind({
 				if (this.content[n].length == 0 && this.getContentError[n] != "failed")
 					return;
 			}
-			this.$.scrim.destroy();
+			this.$.scrim.hide()//destroy();
 		} else {
 			// try again
 			this.$.getContent.call({
 				category: inRequest.params.category,
-				posts: 20,
+				posts: (inRequest.params.category == 31) ? 15 : 20,
 				brief: 1
 			});
 			this.getContentError[category] = true;
@@ -1067,14 +1103,6 @@ enyo.kind({
 	interceptClick: function(inSender, inEvent) {
 		if (inEvent.target) {
 			switch(inEvent.target.nodeName) {
-				case "A":
-					inEvent.stopPropagation();
-					var children = inEvent.target.childNodes;
-					for (var i = 0; i < children.length; i++) {
-						if (children[i].nodeName && children[i].nodeName == "img")
-							return;
-					}
-					break;
 				case "IMG":
 					inEvent.stopPropagation();
 					inEvent.preventDefault();
@@ -1211,7 +1239,7 @@ enyo.kind({
 		},
 		{
 			/* onSuccess handler is shareToFacebook or shareToTwitter */
-			onSuccess: "shareTo" + inEvent.value
+			onSuccess: "shareTo" + inEvent.caption.replace(" ", "")
 		});
 	},
 	/* onSuccess handler for shortenURL WebService when posting to Facebook */
@@ -1221,27 +1249,52 @@ enyo.kind({
 				id: "com.palm.app.enyo-facebook",
 				params: {
 					type: "status",
-					statusText: this.openedArticle.article.title + " on webOSroundup: " + inResponse.data.url + " (via webOSroundup XL)"
+					statusText: [this.openedArticle.article.title, " on webOSroundup: ", inResponse.data.url, " (via webOSroundup XL)"].join('')
 				}
 			});
 		} else {
 			// TODO: display error... or just use long URL??
 		}
 	},
-	/* onSuccess handler for shortenURL WebService when posting to Twitter */
-	shareToTwitter: function(inSender, inResponse, inRequest) {
+	/* onSuccess handler for shortenURL WebService when posting to SpazHD */
+	shareToSpazHD: function(inSender, inResponse, inRequest) {
 		if (inResponse.status_code === 200) {
-			// right now we only have Spaz HD on webOS, so we'll use that!
 			this.$.appMgr.call({
 				id: "com.funkatron.app.spaz-hd",
 				params: {
 					action: "prepPost",
-					msg: this.openedArticle.article.title + ": " + inResponse.data.url + " via @webOSroundup XL"
+					msg: [this.openedArticle.article.title, ": ", inResponse.data.url, " via @webOSroundup XL"].join('')
 				}
 			});
 		} else {
 			// TODO: display error... or just use long URL??
 		}
+	},
+	shareToGlimpse: function(inSender, inResponse, inRequest) {
+		if (inResponse.status_code === 200) {
+			delete this.shareArticleTweet;
+			this.shareArticleTweet = [this.openedArticle.article.title, ": ", inResponse.data.url, " via @webOSroundup XL"].join('');
+			this.$.appMgr.call({
+				id: "com.palm.ingloriousapps.glimpseunrateddevcut",
+				params: {
+					query: "tweet/" + this.shareArticleTweet
+				}
+			},
+			{
+				onFailure: "shareToNormalGlimpse"
+			});
+		} else {
+			// TODO: display error... or just use long URL??
+		}
+	},
+	shareToNormalGlimpse: function(inSender, inResponse, inRequest) {
+		this.$.appMgr.call({
+			id: "com.ingloriousapps.glimpse",
+			params: {
+				query: "tweet/" + this.shareArticleTweet
+			}
+		});
+		delete this.shareArticleTweet;
 	},
 	/* open up the "Share Article" popup */
 	openSharePopup: function(inSender, inEvent) {
