@@ -76,7 +76,7 @@ enyo.kind({
 		{
 			kind: enyo.Image,
 			name: "Himage",
-			style: "margin-right: 4px; border: 1px solid #000; background: #eee; width: 150px; height: 150px;",
+			style: "margin-right: 4px; border: 1px solid #000; width: 150px; height: 150px;",
 			onclick: "openArticle"
 		},
 		/* article info */
